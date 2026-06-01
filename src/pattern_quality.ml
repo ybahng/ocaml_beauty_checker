@@ -11,18 +11,6 @@ let rec if_depth expr =
   | Pexp_ifthenelse (_, t, None)   -> 1 + if_depth t
   | _ -> 0
 
-(* Counts wildcard (_) cases in a match as a ratio *)
-let wildcard_ratio cases =
-  let total = List.length cases in
-  if total = 0 then 0.0
-  else
-    let wildcards = List.fold_left (fun acc c ->
-      match c.pc_lhs.ppat_desc with
-      | Ppat_any -> acc + 1
-      | _ -> acc) 0 cases
-    in
-    float_of_int wildcards /. float_of_int total
-
 let analyze ast =
   let issues = ref [] in
   let penalty = ref 0.0 in
@@ -40,13 +28,6 @@ let analyze ast =
             (Printf.sprintf "nested if-then-else (depth %d)" depth)
             "consider using match"
             (0.1 *. float_of_int (depth - 2))
-      | Pexp_match (_, cases) ->
-        let ratio = wildcard_ratio cases in
-        if ratio > 0.4 then
-          add (Ast_walker.get_line e.pexp_loc)
-            (Printf.sprintf "match with %.0f%% wildcard branches" (ratio *. 100.0))
-            "consider more specific patterns"
-            (ratio *. 0.2)
       | _ -> ());
       default_iterator.expr self e
   } in

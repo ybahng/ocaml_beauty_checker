@@ -2,3 +2,8 @@
  (name main)
  (libraries compiler-libs.common str)
  (modules metric ast_walker functional_purity pattern_quality naming_clarity structural_depth scorer reporter main))
+
+(install
+ (package ocaml-beauty)
+ (section bin)
+ (files (main.exe as ocaml-beauty)))
